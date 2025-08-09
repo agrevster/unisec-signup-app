@@ -10,7 +10,7 @@ screen_color = (RED,MAGENTA,ON)
 dialog_color = (BLACK,WHITE,OFF)
 
 # Dialog box title color
-title_color = (MAGENTA,YELLOW,OFF)
+title_color = (MAGENTA,WHITE,ON)
 
 # Dialog box border color
 border_color = (WHITE,WHITE,ON)

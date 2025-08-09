@@ -2,23 +2,38 @@
 
 
 export DIALOGRC=./dialogrc
-dialog --colors --title "UNISEC" --msgbox "$(cat ./about-unisec.txt)" 100 100 --ok-label "Next"
+while true; do
+  dialog --colors --title "UNISEC" --msgbox "$(cat ./about-unisec.txt)" 100 100 --ok-label "Next"
 
-exec 3>&1
+  while true; do
+    FORM_DATA=$(dialog --stdout --title "UNISEC: User Details" \
+      --form "Enter User Details" 15 50 0 \
+      "Name: "  1 1 ""  1 10 20 0 \
+      "Email: " 2 1 ""  2 10 20 0)
 
-FORM_DATA=$(dialog --title "UNISEC: User Details" --form "Enter User Details" 15 50 0 \
-"Name: "  1 1 "" 1 10 20 0 \
-"Email: " 2 1 "" 2 10 20 0 \
-2>&1 1>&3)
+    if [ $? -ne 0 ]; then
+      break
+    fi
 
-exec 3>&-
+    NAME=$(echo "$FORM_DATA" | sed -n 1p)
+    EMAIL=$(echo "$FORM_DATA" | sed -n 2p)
 
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "User cancelled (Exit Code: $EXIT_CODE). Exiting."
-  exit 1
-fi
+    if [ -z "$NAME" ] || [ -z "$EMAIL" ]; then
+      dialog --title "Error" --msgbox "All fields are required. Please fill them in." 6 50
+      continue
+    fi
 
-TSV_LINE=$(echo "$FORM_DATA" | paste -sd '\t' -)
+    break
+  done
 
-echo "$TSV_LINE" >> signup.tsv
+
+  EXIT_CODE=$?
+  if [ $EXIT_CODE -ne 0 ]; then
+    echo "User cancelled (Exit Code: $EXIT_CODE). Exiting."
+    exit 1
+  fi
+
+  TSV_LINE=$(echo "$FORM_DATA" | paste -sd '\t' -)
+
+  echo "$TSV_LINE" >> signup.tsv
+done
